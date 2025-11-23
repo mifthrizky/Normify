@@ -1,6 +1,12 @@
-FROM python:3.9-slim
+FROM python:3.9
 
 WORKDIR /code
+
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    gfortran \
+    libopenblas-dev \
+    liblapack-dev
 
 COPY ./requirements.txt /code/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
