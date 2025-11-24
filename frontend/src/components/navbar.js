@@ -14,41 +14,54 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white shadow-lg sticky top-0 z-40">
-      <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-        <Link href="/" className="text-2xl font-bold flex items-center gap-2 hover:text-blue-100 transition">
-          <span className="text-3xl">📊</span>
-          Normify
-        </Link>
+    <nav className="bg-gray-60 pt-6 px-4">
+      {/* CARD NAVBAR */}
+      <div className="mx-auto max-w-6xl bg-white rounded-xl shadow-sm border border-gray-100 px-6 py-3 flex justify-between items-center">
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex gap-8">
+        {/* LOGO */}
+      <Link href="/" className="flex items-center gap-3">
+        <img 
+          src="/logo.png" 
+          alt="Normify Logo"
+          className="w-12 h-12"
+        />
+
+      <span className="text-xl font-bold text-slate-700">
+        Normify
+      </span>
+    </Link>
+
+
+        {/* DESKTOP NAV */}
+        <div className="hidden md:flex gap-10">
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="font-medium hover:text-blue-100 transition duration-300 relative group"
+              className="text-sm font-medium text-gray-600 hover:text-gray-900 transition"
             >
               {item.label}
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-200 group-hover:w-full transition-all duration-300"></span>
             </Link>
           ))}
         </div>
 
-        {/* Mobile Menu Button */}
-        <button onClick={() => setIsOpen(!isOpen)} className="md:hidden text-2xl focus:outline-none">
+        {/* MOBILE BUTTON */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="md:hidden text-3xl text-slate-700"
+        >
           {isOpen ? "✕" : "☰"}
         </button>
       </div>
 
-      {/* Mobile Navigation */}
+      {/* MOBILE DROPDOWN */}
       {isOpen && (
-        <div className="md:hidden bg-blue-700 px-6 py-4 space-y-3 border-t border-blue-500">
+        <div className="md:hidden bg-white border rounded-xl mt-2 mx-auto max-w-6xl px-6 py-4 shadow">
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="block py-2 font-medium hover:text-blue-100 transition"
+              className="block py-2 text-gray-700 font-medium"
               onClick={() => setIsOpen(false)}
             >
               {item.label}

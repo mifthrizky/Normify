@@ -7,7 +7,13 @@ export default function Dashboard() {
       <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-20 px-4">
         <div className="container mx-auto text-center space-y-8">
           <div className="flex justify-center">
-            <span className="text-8xl animate-bounce">📊</span>
+            <span className="text-8xl animate-bounce">
+                <img 
+            src="/logo.png" 
+            alt="Normify Logo"
+            className="w-60 h-60"
+          />
+            </span>
           </div>
 
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900">
@@ -76,30 +82,6 @@ export default function Dashboard() {
               title="Akurat & Terpercaya"
               description="Semua perhitungan menggunakan rumus statistika standar yang telah diverifikasi."
             />
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-12 px-4">
-        <div className="container mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-4xl font-bold mb-2">1000+</div>
-              <p className="text-blue-100">Pengguna Aktif</p>
-            </div>
-            <div>
-              <div className="text-4xl font-bold mb-2">5000+</div>
-              <p className="text-blue-100">Uji Dilakukan</p>
-            </div>
-            <div>
-              <div className="text-4xl font-bold mb-2">99%</div>
-              <p className="text-blue-100">Kepuasan Pengguna</p>
-            </div>
-            <div>
-              <div className="text-4xl font-bold mb-2">24/7</div>
-              <p className="text-blue-100">Tersedia Online</p>
-            </div>
           </div>
         </div>
       </section>
