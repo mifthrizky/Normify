@@ -6,7 +6,11 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-2xl">📊</span>
+                  <img 
+              src="/logo.png" 
+              alt="Normify Logo"
+              className="w-12 h-12"
+            />
               <h3 className="text-xl font-bold text-white">Normify</h3>
             </div>
             <p className="text-sm text-gray-400">
@@ -63,7 +67,7 @@ export default function Footer() {
           {/* Contact */}
           <div>
             <h4 className="text-white font-semibold mb-4">Tentang</h4>
-            <p className="text-sm text-gray-400 mb-4">Dibuat dengan ❤️ untuk memudahkan pembelajaran statistika.</p>
+            <p className="text-sm text-gray-400 mb-4">Dibuat dengan ❤ untuk memudahkan pembelajaran statistika.</p>
             <div className="flex gap-3">
               <a href="#" className="text-xl hover:text-blue-400 transition">
                 📧
