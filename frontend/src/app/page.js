@@ -74,8 +74,8 @@ export default function Dashboard() {
               <div className="grid grid-cols-3 gap-6 pt-8">
                 {[
                   { icon: "⚡", value: "1s", label: "Perhitungan" },
-                  { icon: "📊", value: "99.9%", label: "Akurat" },
-                  { icon: "∞", value: "Unlimited", label: "Data" },
+                  { icon: "📊", value: "Efisien", label: "Akurat" },
+                  { icon: "24/7", value: "Aktif", label: "Kapan Saja" },
                 ].map((stat, i) => (
                   <div key={i} className="group">
                     <div className="text-3xl mb-2">{stat.icon}</div>
