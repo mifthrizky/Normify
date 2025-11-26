@@ -174,7 +174,7 @@ export default function Dashboard() {
                     </div>
                     <div>
                       <div className="text-xs text-white/60">Linearity (R²)</div>
-                      <div className="text-lg font-bold text-green-400">0.998</div>
+                      <div className="text-lg font-bold text-green-400">0.90</div>
                     </div>
                   </div>
                 </div>
@@ -186,7 +186,7 @@ export default function Dashboard() {
                     </div>
                     <div>
                       <div className="text-xs text-white/60">Process Time</div>
-                      <div className="text-lg font-bold text-purple-400">0.04s</div>
+                      <div className="text-lg font-bold text-purple-400">&lt;1s</div>
                     </div>
                   </div>
                 </div>
