@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react"; // 1. Tambahkan import Suspense
 import { useSearchParams } from "next/navigation";
 import { ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import * as XLSX from "xlsx";
 
-export default function UjiPage() {
+// 2. Ubah nama fungsi utama lama menjadi UjiContent dan hapus "export default"
+function UjiContent() {
   // --- STATE MANAGEMENT ---
   const [rows, setRows] = useState([{ xi: "", fi: "" }]);
   const [loading, setLoading] = useState(false);
@@ -17,6 +18,8 @@ export default function UjiPage() {
   const [showImportModal, setShowImportModal] = useState(false);
   const [importFile, setImportFile] = useState(null);
   const [importError, setImportError] = useState("");
+
+  // Hook ini yang menyebabkan error jika tidak di-suspend saat build
   const searchParams = useSearchParams();
 
   // === LOAD RESULT FROM URL ===
@@ -61,10 +64,7 @@ export default function UjiPage() {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
 
-    // Set column widths
     worksheet["!cols"] = [{ wch: 12 }, { wch: 12 }];
-
-    // Add header styling
     worksheet["A1"].font = { bold: true, size: 12 };
     worksheet["B1"].font = { bold: true, size: 12 };
 
@@ -87,16 +87,13 @@ export default function UjiPage() {
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
 
-        // Parse data from Excel
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-        // Validasi columns
         if (jsonData.length === 0) {
           setImportError("❌ File Excel kosong atau tidak valid.");
           return;
         }
 
-        // Check if columns exist (case-insensitive)
         const firstRow = jsonData[0];
         const hasXi = Object.keys(firstRow).some((key) => key.toLowerCase().includes("xi"));
         const hasFi = Object.keys(firstRow).some((key) => key.toLowerCase().includes("fi"));
@@ -106,7 +103,6 @@ export default function UjiPage() {
           return;
         }
 
-        // Map data properly
         const xiKey = Object.keys(firstRow).find((key) => key.toLowerCase().includes("xi"));
         const fiKey = Object.keys(firstRow).find((key) => key.toLowerCase().includes("fi"));
 
@@ -151,7 +147,6 @@ export default function UjiPage() {
     setError("");
     setResult(null);
 
-    // Cek apakah ada input yang kosong
     const emptyFields = [];
     rows.forEach((row, index) => {
       if (row.xi === "" || row.xi === null) {
@@ -168,7 +163,6 @@ export default function UjiPage() {
       return;
     }
 
-    // Validasi Input - parse dan filter
     const cleanedData = rows
       .map((r) => ({
         xi: parseFloat(r.xi),
@@ -193,6 +187,8 @@ export default function UjiPage() {
     }
 
     try {
+      // Pastikan URL backend sesuai dengan setup docker-compose (biasanya localhost jika di browser client,
+      // tapi pastikan port forwarding 8000:8000 sudah benar di docker-compose.yml)
       const response = await fetch("http://localhost:8000/calculate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -222,7 +218,6 @@ export default function UjiPage() {
     return `u' = ${m}(xi) ${sign} ${Math.abs(parseFloat(c)).toFixed(4)}`;
   };
 
-  // === SHARE LINK ===
   const handleShareLink = () => {
     try {
       const baseUrl = window.location.origin;
@@ -542,11 +537,11 @@ export default function UjiPage() {
         </div>
       </section>
 
-      {/* === MODAL TAMBAH BARIS === */}
+      {/* === MODAL TAMBAH BARIS & IMPORT EXCEL DI SINI === */}
+      {/* Paste sisa modal code dari file asli (tidak berubah) */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-black border-2 border-cyan-500/50 rounded-2xl p-8 w-full max-w-md shadow-2xl shadow-cyan-500/20">
-            {/* Header */}
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-cyan-400 flex items-center gap-2">
                 <span>➕</span> Tambah Baris
@@ -561,8 +556,6 @@ export default function UjiPage() {
                 ✕
               </button>
             </div>
-
-            {/* Body */}
             <div className="space-y-4 mb-6">
               <p className="text-white/70">Berapa baris data yang ingin Anda tambahkan?</p>
               <input
@@ -577,16 +570,12 @@ export default function UjiPage() {
               />
               <p className="text-xs text-white/50">Minimal: 1 baris | Maksimal: 100 baris</p>
             </div>
-
-            {/* Preview */}
             <div className="mb-6 p-4 bg-cyan-500/10 border border-cyan-500/30 rounded-lg">
               <p className="text-sm text-white/70">
                 Total baris akan menjadi:{" "}
                 <span className="font-bold text-cyan-400">{rows.length + parseInt(rowsToAdd || 0)} baris</span>
               </p>
             </div>
-
-            {/* Footer */}
             <div className="flex gap-3">
               <button
                 onClick={() => {
@@ -608,11 +597,9 @@ export default function UjiPage() {
         </div>
       )}
 
-      {/* === MODAL IMPORT EXCEL === */}
       {showImportModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-black border-2 border-green-500/50 rounded-2xl p-8 w-full max-w-2xl shadow-2xl shadow-green-500/20 max-h-[90vh] overflow-y-auto">
-            {/* Header */}
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-green-400 flex items-center gap-2">
                 <span>📥</span> Import dari Excel
@@ -628,8 +615,6 @@ export default function UjiPage() {
                 ✕
               </button>
             </div>
-
-            {/* Info Box */}
             <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
               <p className="text-xs text-blue-200 leading-relaxed">
                 <strong className="text-blue-400">ℹ️ Format File:</strong> File Excel harus memiliki 2 kolom dengan
@@ -638,8 +623,6 @@ export default function UjiPage() {
                 referensi format yang benar.
               </p>
             </div>
-
-            {/* Template Download */}
             <div className="mb-6">
               <p className="text-sm font-semibold text-white/70 mb-3">📋 Langkah 1: Download Template</p>
               <button
@@ -650,8 +633,6 @@ export default function UjiPage() {
               </button>
               <p className="text-xs text-white/50 mt-2">Template sudah memiliki format yang tepat dengan data contoh</p>
             </div>
-
-            {/* File Upload */}
             <div className="mb-6">
               <p className="text-sm font-semibold text-white/70 mb-3">📤 Langkah 2: Pilih File Excel</p>
               <label className="block">
@@ -664,8 +645,6 @@ export default function UjiPage() {
                 </div>
               </label>
             </div>
-
-            {/* Tips */}
             <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
               <div className="text-xs text-yellow-200 leading-relaxed space-y-2">
                 <div>
@@ -681,16 +660,12 @@ export default function UjiPage() {
                 <div>• Baris kosong akan diabaikan secara otomatis</div>
               </div>
             </div>
-
-            {/* Error Message */}
             {importError && (
               <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 text-red-200 text-sm rounded-lg flex items-start gap-2">
                 <span className="text-lg">❌</span>
                 <span className="text-xs">{importError}</span>
               </div>
             )}
-
-            {/* Footer */}
             <div className="flex gap-3">
               <button
                 onClick={() => {
@@ -713,6 +688,19 @@ export default function UjiPage() {
         </div>
       )}
     </div>
+  );
+}
+
+// 3. Buat komponen export default baru yang membungkus UjiContent dengan Suspense
+export default function UjiPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="bg-black min-h-screen text-white flex items-center justify-center">Loading Application...</div>
+      }
+    >
+      <UjiContent />
+    </Suspense>
   );
 }
 
