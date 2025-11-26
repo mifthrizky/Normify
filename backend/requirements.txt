@@ -1,6 +1,7 @@
 fastapi
 uvicorn
-numpy
-scipy
-pydantic
 pandas
+numpy
+pydantic
+scipy
+python-multipart

@@ -16,6 +16,8 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+    environment:
+      - WATCHPACK_POLLING=true
     command: npm run dev
     depends_on:
       - backend

@@ -1,90 +1,130 @@
 import numpy as np
 import pandas as pd
-from scipy.stats import norm, chi2
+from scipy.stats import norm, linregress
+
+def get_interpolated_u(p_value):
+    # Sumver : Tabel distribusi normal
+    lookup_table = [
+        (-3.29, 0.0005), (-3.09, 0.001), (-2.58, 0.005), (-2.33, 0.01),
+        (-1.96, 0.025), (-1.64, 0.05), (-1.28, 0.10), (-1.00, 0.16),
+        (-0.84, 0.20), (-0.52, 0.30), (-0.25, 0.40), (0.00, 0.50),
+        (0.25, 0.60), (0.52, 0.70), (0.84, 0.80), (1.00, 0.84),
+        (1.28, 0.90), (1.64, 0.95), (1.96, 0.975), (2.33, 0.99),
+        (2.58, 0.995), (3.09, 0.999), (3.29, 0.9995)
+    ]
+    min_table_p = 0.0005
+    max_table_p = 0.9995
+
+    if p_value > max_table_p or p_value < min_table_p:
+        return norm.ppf(p_value)
+
+    for u, p in lookup_table:
+        if np.isclose(p, p_value, atol=1e-5):
+            return u
+
+    u_lower, p_lower = None, None
+    u_upper, p_upper = None, None
+
+    for i in range(len(lookup_table) - 1):
+        curr_u, curr_p = lookup_table[i]
+        next_u, next_p = lookup_table[i+1]
+        
+        if curr_p <= p_value <= next_p:
+            u_lower, p_lower = curr_u, curr_p
+            u_upper, p_upper = next_u, next_p
+            break
+            
+    if u_lower is None:
+        return norm.ppf(p_value)
+
+    slope = (u_upper - u_lower) / (p_upper - p_lower)
+    u_result = u_lower + (p_value - p_lower) * slope
+    return u_result
 
 def perform_normality_test(data_input):
     """
-    Menerima list of dict: [{'xi':10, 'fi':5}, ...]
-    Mengembalikan dict hasil perhitungan lengkap
+    Metode: Normalisasi Kurva.
+    Steps:
+    1. F Kumulatif & F%
+    2. Mencari u (tabel Z)
+    3. Mencari u' (Regresi Linear y=mx+c)
+    4. Mencari p(u')
+    5. Standar Deviasi
+    6. Mencari p(x')
+    7. Mencari f(x')
+    8. Grafik
     """
-    # Konversi dataframe pandas
+
     df = pd.DataFrame(data_input)
+    df = df[df['fi'] > 0]
+    
+    if df.empty:
+        raise ValueError("Data kosong.")
 
-    # Urutkan by xi
     df = df.sort_values(by='xi').reset_index(drop=True)
+    n = df['fi'].sum()
 
-    # Hitung parameter dasar (mean dan std dev)
-    # Mean = Σ(fi . xi) / Σfi
-    total_freq = df['fi'].sum()
-    mean = (df['fi']* df['xi']).sum() / total_freq
-
-    # Std Dev = sqrt(Σ fi * (xi - mean)^2 / (n-1))
-    # Varian sampel
-    variance = (df['fi'] * (df['xi'] - mean)**2).sum() / (total_freq - 1)
-    std_dev = np.sqrt(variance)
-
-    # Batas kelas
     if len(df) > 1:
-        interval = df['xi'].iloc[1] - df['xi'].iloc[0]
+        delta = df['xi'].iloc[1] - df['xi'].iloc[0]
     else:
-        interval = 1
+        delta = 1.0
 
-    # Tepi bawah dan tepi atas
-    #TB = xi - 0.5 * interval
-    #TA = xi + 0.5 * interval
-    df['tb'] = df['xi'] - 0.5 * interval
-    df['ta'] = df['xi'] + 0.5 * interval
+    # 1. Hitung Mean
+    mean_val = (df['xi'] * df['fi']).sum() / n 
 
-    # Hitung Z-score untuk batas kelas
-    # Z_tb = (TB - mean) / S
-    # Z_ta = (TA - mean) / S
-    df['z_tb'] = (df['tb'] - mean) / std_dev
-    df['z_ta'] = (df['ta'] - mean) / std_dev
+    # --- STEP 1: F(kumulatif)
+    df['f_kum'] = df['fi'].cumsum()
+    df['f_percent'] = df['f_kum'] / (n+1)
+    df['f_percent_safe'] = df['f_percent'].apply(lambda x: 0.999 if x >= 1.0 else (0.001 if x <= 0 else x))
 
-    # Luas area di bawah kurva (Probabilitas)
-    # Menggunakan Cummulative Distribution Function (CDF)
-    # Luas = CDF(Z_ta) - CDF(Z_tb)
-    df['prob_z_tb'] = norm.cdf(df['z_tb'])
-    df['prob_z_ta'] = norm.cdf(df['z_ta'])
-    df['luas_area'] = df['prob_z_ta'] - df['prob_z_tb']
+    # --- STEP 2: Mencari u (Interpolasi Distribusi Normal)
+    df['u_obs'] = df['f_percent_safe'].apply(get_interpolated_u)
 
-    # Nilai frekuensi ekspektasi (fe)
-    df['fe'] = df['luas_area'] * total_freq
+    # --- TAHAP 3: Regresi Linear (Hanya untuk cari Slope & Kesimpulan Normal) ---
+    slope, intercept, r_value, p_value, std_err = linregress(df['xi'], df['u_obs'])
+    
+    # u_pred (Regresi) -> Untuk kolom tabel "U' (REGRESI)"
+    df['u_pred'] = (slope * df['xi']) + intercept
 
-    # Nilai Chi-Square per baris
-    # (fo - fe)^2 / fe
-    df['chi_square_val'] = ((df['fi'] - df['fe'])**2) / df['fe']
+    # --- TAHAP 4: Standar Deviasi (Grafis) ---
+    std_dev = 1 / slope
 
-    # Total Chi-Square
-    chi_square_hitung = df['chi_square_val'].sum()
+    # --- TAHAP 5 (PERBAIKAN): Mencari p(u') untuk Menggambar Kurva ---
+    # Agar kurva berbentuk lonceng simetris di tengah data (Mean = 5),
+    # Kita JANGAN pakai u_pred (hasil regresi), tapi pakai rumus u standar.
+    
+    # Rumus: u = (xi - Mean) / StdDev
+    # Atau karena StdDev = 1/Slope, sama saja dengan: (xi - Mean) * Slope
+    
+    df['u_curve_ideal'] = (df['xi'] - mean_val) * slope
+    
+    # Hitung tinggi kurva berdasarkan u_curve_ideal
+    df['p_u_accent'] = norm.pdf(df['u_curve_ideal'])
 
-    # Critical Value (Chi Square Tabel)
-    # Derajat kebebasan (dk) = k - 3
-    # Jika k (jumlah kelas) <= 3, set dk =1 (menghindari error)
-    k = len(df)
-    dk = k - 3
-    if dk < 1:
-        dk = 1
+    # --- TAHAP 6: Mencari p(x')
+    df['p_x_accent'] = df['p_u_accent'] / std_dev
 
-    alpha = 0.05
-    chi_square_tabel = chi2.ppf(1 - alpha, dk)
+    # --- TAHAP 7: Mencari f(x')
+    df['f_x_accent'] = df['p_x_accent'] * delta * n
 
-    # Kesimpulan
-    is_normal = chi_square_hitung < chi_square_tabel
+    # --- TAHAP 8: Kesimpulan
+    r_squared = r_value**2
+    
+    results = df.round(6).to_dict(orient='records')
 
-    results = df.round(4).to_dict(orient='records')
+    threshold = 0.90
 
     return {
         "statistics": {
-            "mean": round(mean, 4),
+            "total_n": int(n),
+            "delta": delta,
+            "mean": round(mean_val, 4),
             "std_dev": round(std_dev, 4),
-            "total_data": int(total_freq),
-            "chi_square_hitung": round(chi_square_hitung, 4),
-            "chi_square_tabel": round(chi_square_tabel, 4),
-            "dk": int(dk),
-            "alpha": alpha,
-            "conclusion": "NORMAL" if is_normal else "TIDAK NORMAL",
-            "is_normal": bool(is_normal)
-        }, 
+            "slope_m": round(slope, 4),
+            "intercept_c": round(intercept, 4),
+            "r_squared": round(r_squared, 4),
+            "conclusion": "NORMAL" if r_squared >= threshold else "MENYIMPANG",
+            "is_normal": bool(r_squared >= threshold)
+        },
         "table_data": results
     }

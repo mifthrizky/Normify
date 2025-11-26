@@ -1,16 +1,12 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Dict, Any
-import uvicorn
+from typing import List
+from .calculation import perform_normality_test
 
-# Import fungsi perhitungan
-from app.calculation import perform_normality_test
+app = FastAPI()
 
-
-app = FastAPI(title="API Uji Kenormalan")
-
-# Konfigurasi CORS
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -19,38 +15,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Schema Data
-class DataRow(BaseModel):
+class DataItem(BaseModel):
     xi: float
     fi: float
 
+class CalculateRequest(BaseModel):
+    data: List[DataItem]
 
-class NormalityRequest(BaseModel):
-    data: List[DataRow]
-
-
-# Routes
-@app.get("/")
-def read_root():
-    return {"message": "Backend Statistika Aktif!"}
-
-@app.post("/calculate", status_code=200)
-def calculate_endpoint(payload: NormalityRequest):
-    """
-    ENDPOINT UTAMA
-    """
+@app.post("/calculate")
+async def calculate(request: CalculateRequest):
     try:
-        if not payload.data:
-            raise HTTPException(status_code=400, detail="Data tidak boleh kosong.")
-        
-        # Konversi format pydantic
-        raw_data = [row.dict() for row in payload.data]
-
-        result = perform_normality_test(raw_data)
+        # Build input with keys expected by perform_normality_test: 'xi' and 'fi'
+        data_input = [{"xi": item.xi, "fi": item.fi} for item in request.data]
+        result = perform_normality_test(data_input)
         return result
-    
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+        import traceback
+        error_detail = traceback.format_exc()
+        print(error_detail)
+        # Return an HTTP error so the frontend doesn't treat this as a successful response
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/")
+async def root():
+    return {"message": "Normify Backend API"}
