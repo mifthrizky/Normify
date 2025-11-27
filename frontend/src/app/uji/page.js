@@ -90,7 +90,7 @@ function UjiContent() {
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
         if (jsonData.length === 0) {
-          setImportError("❌ File Excel kosong atau tidak valid.");
+          setImportError("File Excel kosong atau tidak valid.");
           return;
         }
 
@@ -378,16 +378,19 @@ function UjiContent() {
                     <div className="space-y-3">
                       <div className="flex items-center gap-3">
                         <span
-                          className={`text-4xl font-black ${
+                          className={`text-3xl md:text-4xl font-black ${
                             result?.statistics?.is_normal ? "text-green-400" : "text-red-400"
                           }`}
                         >
-                          {result?.statistics?.is_normal ? "✓ NORMAL" : "✗ TIDAK NORMAL"}
+                          {/* PERUBAHAN DI SINI: Gunakan text dari backend */}
+                          {result?.statistics?.is_normal ? "✓ NORMAL" : `✗ ${result?.statistics?.conclusion}`}
                         </span>
                         <div className="flex-1 text-right">
                           <p className="text-sm text-white/70">R² = {result?.statistics?.r_squared}</p>
                           <p className="text-xs text-white/50">
-                            {result?.statistics?.is_normal ? "(Garis sangat lurus)" : "(Garis tidak lurus)"}
+                            {result?.statistics?.is_normal
+                              ? "(Garis sangat lurus)"
+                              : "(Garis tidak lurus / Data miring)"}
                           </p>
                         </div>
                       </div>
@@ -395,9 +398,14 @@ function UjiContent() {
                   </div>
 
                   {/* 2. STATISTIK RINGKAS */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {/* Ubah grid-cols-4 menjadi grid-cols-5 agar rapi */}
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                     <StatCard icon="📊" label="Mean" value={result.statistics.mean} />
                     <StatCard icon="📈" label="Std Dev" value={result.statistics.std_dev} />
+
+                    {/* TAMBAHAN: Kartu Skewness */}
+                    <StatCard icon="📉" label="Skewness" value={result.statistics.skewness} />
+
                     <StatCard icon="📐" label="Slope (m)" value={result.statistics.slope_m} />
                     <StatCard icon="📍" label="Intercept (c)" value={result.statistics.intercept_c} />
                   </div>

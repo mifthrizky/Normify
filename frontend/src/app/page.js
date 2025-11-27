@@ -174,7 +174,7 @@ export default function Dashboard() {
                     </div>
                     <div>
                       <div className="text-xs text-white/60">Linearity (R²)</div>
-                      <div className="text-lg font-bold text-green-400">0.90</div>
+                      <div className="text-lg font-bold text-green-400">0.95</div>
                     </div>
                   </div>
                 </div>
