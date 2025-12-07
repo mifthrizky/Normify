@@ -63,6 +63,7 @@ def perform_normality_test(data_input):
         raise ValueError("Data kosong atau format salah.")
         
     df = df[df['fi'] > 0].sort_values(by='xi').reset_index(drop=True)
+    # Hitung N (Total Frekuensi)
     n = df['fi'].sum()
 
     # Expand data mentah untuk hitung Skewness yang akurat

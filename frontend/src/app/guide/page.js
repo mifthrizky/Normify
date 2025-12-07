@@ -206,12 +206,14 @@ export default function GuidePage() {
 
             {/* PDF Viewer - Using iframe */}
             <div className="flex-1 overflow-hidden bg-white/5">
-              <iframe
-                src="/file/Latihan.pdf#toolbar=1&navpanes=0&scrollbar=1"
-                className="w-full h-full border-0"
-                title="Guide Book PDF"
-                style={{ background: "#ffffff" }}
-              />
+              <object data="/file/GuideBook.pdf" type="application/pdf" className="w-full h-full rounded-lg">
+                <div className="flex flex-col items-center justify-center h-full text-white/70">
+                  <p>Browser Anda tidak dapat menampilkan PDF ini.</p>
+                  <a href="/file/GuideBook.pdf" download className="mt-2 text-cyan-400 underline">
+                    Download PDF saja
+                  </a>
+                </div>
+              </object>
             </div>
 
             {/* Modal Footer */}
@@ -219,7 +221,7 @@ export default function GuidePage() {
               <p className="text-sm text-white/60">📘 Panduan Lengkap Uji Normalitas Data Metode Garis Lurus</p>
               <div className="flex gap-3">
                 <a
-                  href="/file/Latihan.pdf"
+                  href="/file/GuideBook.pdf"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-4 py-2 bg-cyan-500/20 border border-cyan-500/50 rounded-lg text-cyan-400 hover:bg-cyan-500/30 transition-all text-sm font-semibold"
@@ -227,7 +229,7 @@ export default function GuidePage() {
                   🔗 Buka Tab Baru
                 </a>
                 <a
-                  href="/file/Latihan.pdf"
+                  href="/file/GuideBook.pdf"
                   download="Panduan_Uji_Normalitas.pdf"
                   className="px-4 py-2 bg-purple-500/20 border border-purple-500/50 rounded-lg text-purple-400 hover:bg-purple-500/30 transition-all text-sm font-semibold"
                 >
