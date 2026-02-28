@@ -6,16 +6,6 @@
 
 ## 📸 Tampilan Aplikasi
 
-### Halaman Utama (Dashboard)
-<img width="1872" height="963" alt="Normify Dashboard" src="https://github.com/user-attachments/assets/3884f985-bfc2-4d88-9367-6c1b7c0ecf92" />
-
-### Halaman Perhitungan & Analisis Data
-<div style="display: flex; gap: 10px;">
-<img width="1122" height="935" alt="Input Data & Hasil" src="https://github.com/user-attachments/assets/608b6aaf-d40f-4e97-a469-56c5687401cb" />
-<img width="702" height="592" alt="Screenshot 2025-12-07 145600" src="https://github.com/user-attachments/assets/29b317e2-3a99-4dd3-b2ce-0c21d904ae29" />
-
-</div>
-
 ### Panduan Pengguna (GuideBook)
 <img width="621" height="885" alt="image" src="https://github.com/user-attachments/assets/025b969f-7853-4f0e-aa57-e84c48ee7536" />
 
