@@ -4,8 +4,6 @@
 
 ---
 
-## 📸 Tampilan Aplikasi
-
 ### Panduan Pengguna (GuideBook)
 <img width="621" height="885" alt="image" src="https://github.com/user-attachments/assets/025b969f-7853-4f0e-aa57-e84c48ee7536" />
 
